@@ -18,8 +18,6 @@ class ObserverPattern {
   }
 }
 
-
-
 let op = new ObserverPattern()
 op.subscribe({name: 'Behrooz'})
 op.subscribe({name: 'Hesam'})
