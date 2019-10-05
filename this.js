@@ -5,6 +5,9 @@
 // bind will wait for the event to get called ex. onClick, bind will return new function
 // call accept args and apply accept array
 
+
+// https://www.codementor.io/niladrisekhardutta/how-to-call-apply-and-bind-in-javascript-8i1jca6jp
+
 // Explicit binding
 const person1 = {name: 'Bruce'}
 const person2 = {name: 'Alice'}

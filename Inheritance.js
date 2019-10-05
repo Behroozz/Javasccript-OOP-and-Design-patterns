@@ -165,3 +165,145 @@ let myCat = new Cat();
 myCat.eat();
 Cat.getAnimalProperties()
 
+
+
+// Class Inheritance:
+// JavaScript’s class inheritance uses the prototype chain to wire the child `Constructor.prototype` 
+// to the parent `Constructor.prototype` for delegation. Usually, the `super()` constructor is also called. 
+// Those steps form single-ancestor parent/child hierarchies and create the tightest coupling available in OO design.
+
+
+// Prototypal Inheritance: 
+// A prototype is a working object instance. Objects inherit directly from other objects.
+
+//Instances are typically instantiated via factory functions, object literals, or `Object.create()`.
+
+// Inheritance is fundamentally a code reuse mechanism: A way for different kinds of objects to share code. 
+// The way that you share code matters because if you get it wrong, it can create a lot of problems, specifically:
+
+//1) The tight coupling problem
+//2) The fragile base class problem
+//3) Inflexible hierarchy problem
+//4) The duplication by necessity problem 
+
+// => favor object composition over class inheritance
+
+
+class GuitarAmp {
+  constructor( { cabinet = 'spruce', volume = '0'} ) {
+    Object.assign(this, {
+      cabinet, volume
+    })
+  }
+}
+
+class BassAmp extends GuitarAmp {
+  constructor( options = {}) {
+    super(options)
+    this.lowCut = options.lowCut
+  }
+}
+
+class ChannelStrip extends BassAmp {
+  constructor(options={}) {
+    super(options)
+    this.inputLevel = options.inputLevel
+  }
+}
+
+// BassAmp` inherits from `GuitarAmp`, and `ChannelStrip` inherits from `BassAmp` & `GuitarAmp`. This is an example of how OO design goes wrong. A channel strip isn’t actually a type of guitar amp
+
+
+const cabinet = { cabinet: 'maple' }
+const volume = { volume: 1 }
+const lowCut = { lowCut: 1 }
+const inputLevel = { inputLevel: 1 }
+
+const GuitarAmp = (options) => {
+  return Object.assign({}, cabinet, volume, options)
+}
+
+const BassAmp = (options) => {
+  return Object.assign({}, cabinet, volume, lowCut, options)
+}
+
+const ChannelStrip = (options) => {
+  return Object.assign({}, cabinet, volume, inputLevel)
+}
+
+// https://medium.com/javascript-scene/3-different-kinds-of-prototypal-inheritance-es6-edition-32d777fa16c9
+// If you look carefully, you might see that we’re being much 
+// more specific about which objects get which properties because
+// with composition, we can. It wasn’t really an option with class 
+// inheritance. When you inherit from a class, you get everything, 
+// even if you don’t want it.
+
+//prototypal OO  3 types:
+// 1) Concatenative inheritance: (Mixin)
+// Concatenative inheritance is the process of copying the properties 
+// from one object to another, without retaining a reference between 
+// the two objects by cloning and Object.assign()
+
+const proto = {
+  hello: function hello() {
+    return `Hello, my name is ${ this.name }`
+  }
+}
+const Behrooz = Object.assign({}, proto, { name: 'Behrooz' })
+const msg = Behrooz.hello()
+
+// 2) Prototype delegation
+// When you try to access a property on the new object, 
+// it checks the object’s own properties first. If it doesn’t 
+// find it there, it checks the `[[Prototype]]`, and so on up 
+// the prototype chain until it gets back to `Object.prototype`, 
+// which is the root delegate for most objects.
+
+// Method delegation can preserve memory resources because you only
+// need one copy of each method to be shared by all instances
+
+function Greeter(name) {
+  this.name = name 
+}
+
+Greeter.prototype.hello = function hello() {
+  return `Hello ${this.name}`
+}
+
+const Behrooz = Greeter('Behrooz')
+const msg = Behrooz.hello()
+
+
+// Functional Inheritance
+// Functions created for the purpose of extending existing 
+// objects are commonly referred to as functional mixins. 
+// The primary advantage of using functions for extension is 
+// that it allows you to use the function closure to encapsulate 
+// private data. In other words, you can enforce private state.
+ import Events from 'eventemitter3'
+
+ const rawMixin = function() {
+   const attr = {}
+
+   return Object.assign(this, {
+     set(name, value) {
+      attr[name] = value
+
+      this.emit('change', {
+        prop: name,
+        value: value
+      })
+     },
+
+     get(name) {
+       return attr[name]
+     }
+   }, Events.prototype)
+ }
+
+ const mixinModal = (target) => rawMixin.call(target)
+
+ const Behrooz = { name: 'Behrooz'}
+ const model = mixinModal(Behrooz)
+
+ model.on('change', data => console.log(data))
